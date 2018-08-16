@@ -100,6 +100,13 @@ print("nlist:", index.nlist)
 print("nprobe:", index.nprobe)
 ```
 
+Note that you might need to set `quantizer` and `index` as member variables if you'd like to use them inside your class, e.g.,
+```
+self.quantizer = faiss.IndexHNSWFlat(D, hnsw_m)
+self.index = faiss.IndexIVFPQ(self.quantizer, D, nlist, M, nbits)
+```
+See https://github.com/facebookresearch/faiss/issues/540
+
 ## I/O
 Faiss index can be read/write via util functions:
 ```python
