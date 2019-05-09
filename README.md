@@ -195,3 +195,39 @@ Or, you can explicitly set an environment variable in your terminal.
 export OMP_NUM_THREADS=1
 ```
 
+## Hamming distance table
+Give two sets of binary vectors, pairwise hamming distances can be computed as follows.
+
+The code is from [https://github.com/facebookresearch/faiss/issues/740#issuecomment-470959391](https://github.com/facebookresearch/faiss/issues/740#issuecomment-470959391)
+
+```python
+def pairwise_hamming_dis(a, b):
+    """ compute the pairwise Hamming distances between two matrices """
+    na, d = a.shape
+    nb, d2 = b.shape
+    assert d == d2
+
+    dis = np.empty((na, nb), dtype='int32')
+
+    faiss.hammings(
+        faiss.swig_ptr(a), faiss.swig_ptr(b),
+        na, nb, d,
+        faiss.swig_ptr(dis)
+    )
+    return dis
+
+# Each vector must be the form of "uint8 * ncodes",
+# where ncodes % 8 == 0
+xq = np.array([[0, 0, 0, 0, 0, 0, 0, 2],     # [0, 0, ..., 1, 0] <- 64 bits (ncodes=8)
+               [0, 0, 0, 0, 0, 0, 0, 3]],    # [0, 0, ..., 1, 1]
+               dtype=np.uint8)
+xb = np.array([[0, 0, 0, 0, 0, 0, 0, 2],     # [0, 0, ..., 1, 0]
+               [0, 0, 0, 0, 0, 0, 0, 0],     # [0, 0, ..., 0, 0]
+               [0, 0, 0, 0, 0, 0, 0, 1]],    # [0, 0, ..., 0, 1]
+               dtype=np.uint8)
+
+dis = pairwise_hamming_dis(xq, xb)
+print(dis)
+# [[0 1 2]
+#  [1 2 1]]
+```
