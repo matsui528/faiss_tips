@@ -30,6 +30,7 @@ print(type(ids), ids.dtype, ids.shape)  # <class 'numpy.ndarray'> int64 (3, 4)
 print("N:", index.ntotal)
 print("D:", index.d)
 ```
+Note that `index.add` function copies the data. If you would like to reduce the overhead of the copy, see this [wiki](https://github.com/facebookresearch/faiss/wiki/Brute-force-search-without-an-index) and [gists](https://gist.github.com/mdouze/8e47d8a5f28280df7de7841f8d77048d).
 
 ## Nearest neighbor search (GPU)
 The nearest neighbor search on GPU(s). This returns the (almost) same result as that of CPU. This is extremely fast although there aren't any approximation steps. You should try this if the data fit into your GPU memory.
@@ -161,7 +162,11 @@ Note that you can enumerate all posting lists (both indices and codes) if you wa
 id_poslists = []  
 code_poslists = []  
 
-code_sz = index.invlists.code_size  # Code size per vector in bytes. This equals to M if nbits=8
+code_sz = index.invlists.code_size
+# Code size per vector in bytes. This equals to
+# - 4 * D  (if IndexIVFFlat)
+# - M      (if IndexIVFPQ with nbits=8)
+print("code_sz:", code_sz)
 
 for list_no in range(index.nlist):
     list_sz = index.invlists.list_size(list_no)  # The length of list_no-th posting list
@@ -196,7 +201,7 @@ export OMP_NUM_THREADS=1
 ```
 
 ## Hamming distance table
-Give two sets of binary vectors, pairwise hamming distances can be computed as follows.
+Given two sets of binary vectors, pairwise hamming distances can be computed as follows.
 
 The code is from [https://github.com/facebookresearch/faiss/issues/740#issuecomment-470959391](https://github.com/facebookresearch/faiss/issues/740#issuecomment-470959391)
 
@@ -230,4 +235,125 @@ dis = pairwise_hamming_dis(xq, xb)
 print(dis)
 # [[0 1 2]
 #  [1 2 1]]
+```
+
+
+## Merge results
+You can merge search results from several indices. The code is from [https://github.com/facebookresearch/faiss/blob/master/benchs/bench_all_ivf/datasets.py#L75](https://github.com/facebookresearch/faiss/blob/master/benchs/bench_all_ivf/datasets.py#L75)
+
+```python
+import faiss
+import numpy as np
+
+class ResultHeap:
+    """ Combine query results from a sliced dataset """
+
+    def __init__(self, nq, k):
+        " nq: number of query vectors, k: number of results per query "
+        self.I = np.zeros((nq, k), dtype='int64')
+        self.D = np.zeros((nq, k), dtype='float32')
+        self.nq, self.k = nq, k
+        heaps = faiss.float_maxheap_array_t()
+        heaps.k = k
+        heaps.nh = nq
+        heaps.val = faiss.swig_ptr(self.D)
+        heaps.ids = faiss.swig_ptr(self.I)
+        heaps.heapify()
+        self.heaps = heaps
+
+    def add_batch_result(self, D, I, i0):
+        assert D.shape == (self.nq, self.k)
+        assert I.shape == (self.nq, self.k)
+        I += i0
+        self.heaps.addn_with_ids(
+            self.k, faiss.swig_ptr(D),
+            faiss.swig_ptr(I), self.k)
+
+    def finalize(self):
+        self.heaps.reorder()
+
+
+D = 128
+N = 10000
+Nq = 3
+X = np.random.random((N, D)).astype(np.float32)
+Xq = np.random.random((Nq, D)).astype(np.float32)
+
+# Setup
+index = faiss.IndexFlatL2(D)
+index.add(X)
+
+# Search
+topk = 10
+dists, ids = index.search(x=Xq, k=topk)
+print("dists:", dists)
+print("ids:", ids)
+
+
+# Setup with two indices
+index1 = faiss.IndexFlatL2(D)
+index1.add(X[:2000])   # Store the first 2000 vectors
+index2 = faiss.IndexFlatL2(D)
+index2.add(X[2000:])   # Store the remaining
+
+# Search for both indices
+dists1, ids1 = index1.search(x=Xq, k=topk)
+dists2, ids2 = index2.search(x=Xq, k=topk)
+
+# Merge results
+result_heap = ResultHeap(nq=Nq, k=topk)
+result_heap.add_batch_result(D=dists1, I=ids1, i0=0)
+result_heap.add_batch_result(D=dists2, I=ids2, i0=2000)
+result_heap.finalize()
+print("dists:", result_heap.D)
+print("ids:", result_heap.I)
+
+assert np.array_equal(dists, result_heap.D)
+assert np.array_equal(ids, result_heap.I)
+```
+
+## `std::vector` to/from `np.array`
+When you would like to directly handle std::vector in the c++ class, you can convert std::vector to np.array by `faiss.vector_to_array`. Similarily, you can call `faiss.copy_array_to_vector` to convert np.array to std::vector. See [python/faiss.py](https://github.com/facebookresearch/faiss/blob/master/python/faiss.py) for more details.
+
+```python
+import faiss
+import numpy as np
+
+D = 2
+N = 3
+X = np.random.random((N, D)).astype(np.float32)
+print(X)
+# [[0.8482132  0.17902061]
+#  [0.07226888 0.15747449]
+#  [0.41783017 0.9381101 ]]
+
+# Setup
+index = faiss.IndexFlatL2(D)
+index.add(X)
+
+# Let's see std::vector inside the c++ class (IndexFlatL2)
+# We cannot directly read/update them by nparray.
+print(type(index.xb))  # <class 'faiss.swigfaiss.FloatVector'>
+print(index.xb)  # <faiss.swigfaiss.FloatVector; proxy of <Swig Object of type 'std::vector< float > *' at 0x7fd62822a690> >
+
+# Convert std::vector to np.array
+xb_np = faiss.vector_to_array(index.xb)  # std::vector -> np.array
+print(type(xb_np))  # <class 'numpy.ndarray'>
+print(xb_np)  # [0.8482132  0.17902061 0.07226888 0.15747449 0.41783017 0.9381101 ]
+
+# We can also convert np.array to std::vector
+X2 = np.random.random((N, D)).astype(np.float32)  # new np.array
+X2_std_vector = faiss.FloatVector()  # Buffer.
+print(type(X2_std_vector))  # <class 'faiss.swigfaiss.FloatVector'>
+faiss.copy_array_to_vector(X2.reshape(-1), X2_std_vector)  # np.array -> std::vector. Don't forget to flatten the np.array
+
+# The obtained std:vector can be used inside the c++ class
+index.xb = X2_std_vector  # You can set this in IndexFlatL2 (Be careful. This is dangerous)
+
+print(index.search(x=X2, k=3))  # Works correctly
+# (array([[0.        , 0.09678471, 0.5692644 ],
+#        [0.        , 0.09678471, 0.23682791],
+#        [0.        , 0.23682791, 0.5692644 ]], dtype=float32), array([[0, 1, 2],
+#        [1, 0, 2],
+#        [2, 1, 0]]))
 ```
