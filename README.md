@@ -116,7 +116,7 @@ index2 = faiss.read_index("index.bin")  # index2 is identical to index
 ```
 
 
-## k-means (CPU)
+## k-means (CPU/GPU)
 k-means in faiss is much faster than that in sklearn. See the [benchmark](https://github.com/DwangoMediaVillage/pqkmeans/blob/master/tutorial/4_comparison_to_faiss.ipynb).
 ```python
 import faiss
@@ -129,6 +129,8 @@ X = np.random.random((N, D)).astype(np.float32)
 
 # Setup
 kmeans = faiss.Kmeans(d=D, k=K, niter=20, verbose=True)
+# For GPU(s), run the following line. This will use all GPUs
+# kmeans = faiss.Kmeans(d=D, k=K, niter=20, verbose=True, gpu=True)
 
 # Run clustering
 kmeans.train(X)
