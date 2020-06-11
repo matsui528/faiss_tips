@@ -114,7 +114,20 @@ Faiss index can be read/write via util functions:
 faiss.write_index(index, "index.bin")
 index2 = faiss.read_index("index.bin")  # index2 is identical to index
 ```
-
+Or, you can serialize the index into binary array (np.array). You can save/load it via numpy IO functions.
+```python
+chunk = faiss.serialize_index(index)
+np.save("index.npy", chunk)
+index3 = faiss.deserialize_index(np.load("index.npy"))   # identical to index
+```
+You can even use pickle:
+```python
+import pickle
+with open("index.pkl", "wb") as f:
+    pickle.dump(chunk, f)
+with open("index.pkl", "rb") as f:
+    index4 = faiss.deserialize_index(pickle.load(f))   # identical to index
+```
 
 ## k-means (CPU/GPU)
 k-means in faiss is much faster than that in sklearn. See the [benchmark](https://github.com/DwangoMediaVillage/pqkmeans/blob/master/tutorial/4_comparison_to_faiss.ipynb).
