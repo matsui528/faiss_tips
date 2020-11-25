@@ -254,39 +254,11 @@ print(dis)
 
 
 ## Merge results
-You can merge search results from several indices. The code is from [https://github.com/facebookresearch/faiss/blob/master/benchs/bench_all_ivf/datasets.py#L75](https://github.com/facebookresearch/faiss/blob/master/benchs/bench_all_ivf/datasets.py#L75)
+You can merge search results from several indices by [ResultHeap](https://github.com/facebookresearch/faiss/blob/master/faiss/python/__init__.py#L966)
 
 ```python
 import faiss
 import numpy as np
-
-class ResultHeap:
-    """ Combine query results from a sliced dataset """
-
-    def __init__(self, nq, k):
-        " nq: number of query vectors, k: number of results per query "
-        self.I = np.zeros((nq, k), dtype='int64')
-        self.D = np.zeros((nq, k), dtype='float32')
-        self.nq, self.k = nq, k
-        heaps = faiss.float_maxheap_array_t()
-        heaps.k = k
-        heaps.nh = nq
-        heaps.val = faiss.swig_ptr(self.D)
-        heaps.ids = faiss.swig_ptr(self.I)
-        heaps.heapify()
-        self.heaps = heaps
-
-    def add_batch_result(self, D, I, i0):
-        assert D.shape == (self.nq, self.k)
-        assert I.shape == (self.nq, self.k)
-        I += i0
-        self.heaps.addn_with_ids(
-            self.k, faiss.swig_ptr(D),
-            faiss.swig_ptr(I), self.k)
-
-    def finalize(self):
-        self.heaps.reorder()
-
 
 D = 128
 N = 10000
@@ -316,9 +288,9 @@ dists1, ids1 = index1.search(x=Xq, k=topk)
 dists2, ids2 = index2.search(x=Xq, k=topk)
 
 # Merge results
-result_heap = ResultHeap(nq=Nq, k=topk)
-result_heap.add_batch_result(D=dists1, I=ids1, i0=0)
-result_heap.add_batch_result(D=dists2, I=ids2, i0=2000)
+result_heap = faiss.ResultHeap(nq=Nq, k=topk)
+result_heap.add_result(D=dists1, I=ids1)
+result_heap.add_result(D=dists2, I=ids2 + 2000)  # 2000 is an offset
 result_heap.finalize()
 print("dists:", result_heap.D)
 print("ids:", result_heap.I)
