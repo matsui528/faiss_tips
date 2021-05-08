@@ -344,3 +344,28 @@ print(index.search(x=X2, k=3))  # Works correctly
 #        [1, 0, 2],
 #        [2, 1, 0]]))
 ```
+
+
+## Check instruction sets
+`faiss.supported_instruction_sets()` returns the available instructions.
+This function is available onlyfor the nightly package (as of May 2021)
+
+For example on my WSL2 (x86):
+```ipython
+In [1]: import faiss
+In [2]: faiss.supported_instruction_sets()
+Out[2]:
+{'AVX',
+ 'AVX2',
+ 'F16C',
+ 'FMA3',
+ 'MMX',
+ 'POPCNT',
+ 'SSE',
+ 'SSE2',
+ 'SSE3',
+ 'SSE41',
+ 'SSE42',
+ 'SSSE3'}
+```
+
