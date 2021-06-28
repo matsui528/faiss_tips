@@ -349,7 +349,6 @@ print(index.search(x=X2, k=3))  # Works correctly
 ## Check instruction sets
 `faiss.supported_instruction_sets()` returns the available instructions.
 See [this](https://github.com/facebookresearch/faiss/blob/master/faiss/python/loader.py) for more detail.
-This function is available only for the nightly package (as of May 2021).
 For example on my WSL2 (x86):
 ```ipython
 In [1]: import faiss
@@ -368,13 +367,4 @@ Out[2]:
  'SSE41',
  'SSE42',
  'SSSE3'}
-```
-
-Note that the old API is `faiss.instruction_set()`. See [this PR](https://github.com/facebookresearch/faiss/commit/16b4e88aca2413d2ee2d5d6eea1cf93ba2e9af76#diff-b9512e77dc2f1e68e0108e39136717d4d74bbbd36d2e7b18956b4b58279aa6de) for more detail.
-
-```ipython
-In [1]: import faiss
-
-In [2]: faiss.instruction_set()
-Out[2]: 'AVX2'
 ```
