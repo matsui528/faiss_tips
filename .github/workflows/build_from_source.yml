@@ -9,7 +9,7 @@ jobs:
 
     - name: Build
       run: |
-        bash buil.sh
+        bash build.sh
 
     - name: Test
       run: |
