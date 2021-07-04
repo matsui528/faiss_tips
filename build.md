@@ -7,12 +7,23 @@ This is a step-by-step instruction for building faiss from source. We assume:
 - Intel MKL (we can install it simply by apt for Ubuntu 20.04+)
 - AVX2
 
+We will install faiss and conda on `$HOME`, i.e., 
+```console
+/home/ubuntu
+├── faiss
+└── miniconda
+```
+You can always change the structure.
+
+We tested the following build process on the AWS EC2 c5.12xlarge instance, and the [github actions](.github/workflows/build_from_source.yml).
+
 Official documents:
 - [Official installation guide](https://github.com/facebookresearch/faiss/blob/master/INSTALL.md)
 - [Official wiki](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss)
 - [Official conda config](https://github.com/facebookresearch/faiss/tree/master/conda)
 
 ## [tl;dr](build.sh)
+
 
 ## Prerequisite
 
@@ -46,8 +57,9 @@ Currently, cmake from apt is old (3.16). There are three options to install new 
 ### miniconda
 We will use miniconda for python. See [this](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html#install-macos-silent) for the instruction of the silent installation.
 ```bash
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-bash ~/miniconda.sh -b -p $HOME/miniconda
+cd $HOME
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/miniconda.sh
+bash $HOME/miniconda.sh -b -p $HOME/miniconda
 ```
 Then activate the miniconda
 ```bash
@@ -69,6 +81,7 @@ which python    # /home/ubuntu/miniconda/bin/python
 ## Build c++
 Clone the repo.
 ```bash
+cd $HOME
 git clone https://github.com/facebookresearch/faiss.git
 cd faiss
 ```
@@ -93,7 +106,7 @@ Then, run make to build the library.
 ```bash
 make -C build -j faiss faiss_avx2
 ```
-This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I am not well unserstand this point but we need to manually specify `libfaiss_avx2.so`.
+This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I don't really understand the point, but we need to manually specify `faiss_avx2`.
 
 Let's check the link information by:
 ```bash
@@ -114,7 +127,7 @@ This will show something like:
         /lib64/ld-linux-x86-64.so.2 (0x00007f4e3de2a000)
         libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f4e370ee000)
 ```
-Here, you can see `/lib/x86_64-linux-gnu/libmkl_intel_lp64.so`, etc. This means the faiss is using the Intel MKL that is installed on the system by `apt`.
+Here, you can see `/lib/x86_64-linux-gnu/libmkl_intel_lp64.so`, etc. This means that faiss links the system-installed Intel MKL.
 
 
 Then let's test. It seems `make -C build test` doesn't work. So let's try `demo_ivfpq_indexing`
@@ -131,7 +144,7 @@ It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, th
 If you make sure that the c++ faiss works, let's move to python.
 Let us delete the build directory first and cmake again.
 ```bash
-pwd    # Make sure you are at the root directory of faiss, such as /home/ubuntu/faiss
+cd $HOME/faiss
 rm -rf build
 ```
 
@@ -142,7 +155,7 @@ cmake -B build \
     -DBUILD_TESTING=ON \
     -DFAISS_OPT_LEVEL=avx2 \
     -DFAISS_ENABLE_GPU=OFF \
-    -DFAISS_ENABLE_PYTHON=/home/ubuntu/miniconda/bin/python \
+    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 ```
 For `-DPython_EXECUTABLE`, write the output of `which python`.
@@ -163,11 +176,11 @@ cd build/faiss/python
 python setup.py install
 ```
 
-Finally, you need to specify the PYTHONPATH.
+Finally, you need to specify the PYTHONPATH. Write it on `~/.bashrc`.
 ```bash
-export PYTHONPATH=/home/ubuntu/faiss/build/faiss/python/build/lib:$PYTHONPATH
+echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
+source $HOME/.bashrc
 ```
-Please modify the path according to your environment.
 
 Now you can use faiss from python.
 Let's check it.
@@ -176,14 +189,6 @@ cd    # Do this. We need to verify that we can use python-faiss from any place
 python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
 ```
 You will see something like `483.5049743652344`.
-
-Note that you need to run `export PYTHONPATH= ... ` everytime when you reload the terminal. In order to always activate the python path, please write it on you `.bashrc` manually, or by the following command.
-
-```bash
-echo 'export PYTHONPATH=/home/ubuntu/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
-```
-
-Then close your terminal, open it, and run the above `pyathon -c "import faiss...` again. If it works, that's all.
 
 
 ## Check AVX2 is working or not
@@ -194,7 +199,6 @@ cd
 LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss.so
 ```
 If you see something, then your AVX2 **is not** activated.
-
 
 Run the following as well
 ```bash

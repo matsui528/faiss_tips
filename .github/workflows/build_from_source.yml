@@ -14,17 +14,19 @@ jobs:
         sudo snap install cmake --classic
 
         cd $HOME
-        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
-        bash ~/miniconda.sh -b -p $HOME/miniconda
+        wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/miniconda.sh
+        bash $HOME/miniconda.sh -b -p $HOME/miniconda
+
+        #### Because gh actions don't support "source .bashrc", I simply run export here.
         # echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> $HOME/.bashrc
         # source $HOME/.bashrc
         export PATH="$HOME/miniconda/bin:$PATH"
         conda update conda --yes
         conda update --all --yes
         conda install numpy --yes
-
         which python
 
+        cd $HOME
         git clone https://github.com/facebookresearch/faiss.git
         cd faiss
         
@@ -40,8 +42,10 @@ jobs:
         
         make -C build -j swigfaiss swigfaiss_avx2
         
-        (cd build/faiss/python && python setup.py install)
-        
+        cd build/faiss/python
+        python setup.py install
+
+        #### Because gh actions don't support "source .bashrc", I simply run export here.
         # echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
         # source $HOME/.bashrc
         export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
@@ -49,17 +53,22 @@ jobs:
 
     - name: Test
       run: |
+        ### We need to run export again if we move to the different section
         export PATH="$HOME/miniconda/bin:$PATH"
         export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 
         cd $HOME/faiss
 
+        echo "##### Check ldd of .so #####"
         ldd build/faiss/libfaiss_avx2.so
-        
+
+        echo "##### Run c++ test #####"        
         make -C build demo_ivfpq_indexing
         ./build/demos/demo_ivfpq_indexing
 
+        echo "##### Run python test #####"        
         cd
         python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
 
+        echo "##### AVX2 is activated or not #####"
         LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so
