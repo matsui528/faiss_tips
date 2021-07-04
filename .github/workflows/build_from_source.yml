@@ -1,0 +1,26 @@
+name: Build from source
+on: [push]
+jobs:
+  Build-from-source:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build
+      run: |
+        bash buil.sh
+
+    - name: Test
+      run: |
+        cd ~/faiss
+        
+        ldd build/faiss/libfaiss_avx2.so
+        
+        make -C build demo_ivfpq_indexing
+        ./build/demos/demo_ivfpq_indexing
+
+        cd
+        python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
+
+        LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so
