@@ -5,6 +5,7 @@
     conda install faiss-cpu -c pytorch
     conda install faiss-gpu -c pytorch
     ```
+- If you want to build faiss from source, [see this](build.md).
 
 ## Nearest neighbor search (CPU)
 The most basic nearest neighbor search by L2 distance. This is much faster than scipy. You should first try this, especially when the database is relatively small (N<10^6). The search is automatically paralellized.
