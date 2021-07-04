@@ -23,9 +23,23 @@ jobs:
         conda update conda --yes
         conda update --all --yes
         conda install numpy --yes
-  
+
+        which python
+        cat $HOME/.bashrc
+        
+
+    - name: Check stuff
+      run: |
+        which python
+        cat $HOME/.bashrc
+
+        source $HOME/.bashrc
+        which python
+
+
     - name: Install faiss
       run: |
+
         cd $HOME
         git clone https://github.com/facebookresearch/faiss.git
         cd faiss
