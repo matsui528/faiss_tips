@@ -7,14 +7,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Install by apt
+    - name: Build
       run: |
         sudo apt install -y build-essential swig
         sudo apt install -y intel-mkl
         sudo snap install cmake --classic
 
-    - name: Install miniconda
-      run: |
         cd $HOME
         wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
         bash ~/miniconda.sh -b -p $HOME/miniconda
@@ -26,17 +24,7 @@ jobs:
         conda install numpy --yes
 
         which python
-        
 
-    - name: Check stuff
-      run: |
-        which python
-
-
-    - name: Install faiss
-      run: |
-
-        cd $HOME
         git clone https://github.com/facebookresearch/faiss.git
         cd faiss
         
@@ -54,15 +42,18 @@ jobs:
         
         (cd build/faiss/python && python setup.py install)
         
-        echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
-        source $HOME/.bashrc
-
+        # echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
+        # source $HOME/.bashrc
+        export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 
 
     - name: Test
       run: |
+        export PATH="$HOME/miniconda/bin:$PATH"
+        export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
+
         cd $HOME/faiss
-        
+
         ldd build/faiss/libfaiss_avx2.so
         
         make -C build demo_ivfpq_indexing
