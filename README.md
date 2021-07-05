@@ -9,6 +9,7 @@
     - [instruction](build.md)
     - [script](build.sh)
     - example of github actions: [[code](.github/workflows/build_from_source.yml)][[result](https://github.com/matsui528/faiss_tips/actions/workflows/build_from_source.yml)]
+- If you want to add your class to faiss, see [this](dev.md)
 
 ## Nearest neighbor search (CPU)
 The most basic nearest neighbor search by L2 distance. This is much faster than scipy. You should first try this, especially when the database is relatively small (N<10^6). The search is automatically paralellized.

@@ -141,7 +141,9 @@ Then let's test c++. It seems `make -C build test` doesn't work. So let's try `d
 make -C build -j demo_ivfpq_indexing
 ./build/demos/demo_ivfpq_indexing
 ```
-It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, then distances):` 
+It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, then distances):`.
+
+Note that this script uses `libfaiss.so`. If you want to use `libfaiss_avx2.so`, please rewrite `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss)` to `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss_avx2)` in `$HOME/faiss/demos/CMakeLists.txt`.
 
 
 Then let's build the python module. Run the following.
