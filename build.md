@@ -4,7 +4,7 @@ This is a step-by-step instruction for building faiss from source. We assume:
 - CPU
 - Ubuntu 20.04 
 - miniconda for python environment
-- Intel MKL (we can install it simply by apt for Ubuntu 20.04+)
+- Intel MKL (we can install it simply by `apt` for Ubuntu 20.04+)
 - AVX2
 
 We will install faiss and conda on `$HOME`, i.e., 
@@ -15,14 +15,18 @@ We will install faiss and conda on `$HOME`, i.e.,
 ```
 You can always change the structure.
 
-We tested the following build process on the AWS EC2 c5.12xlarge instance, and the [github actions](.github/workflows/build_from_source.yml).
+We tested the build process on an AWS EC2 c5.12xlarge instance.
 
 Official documents:
 - [Official installation guide](https://github.com/facebookresearch/faiss/blob/master/INSTALL.md)
 - [Official wiki](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss)
 - [Official conda config](https://github.com/facebookresearch/faiss/tree/master/conda)
 
-## [tl;dr](build.sh)
+## tl;dr
+- [build script](build.sh)
+- github actions
+    - [code](.github/workflows/build_from_source.yml)
+    - [result](https://github.com/matsui528/faiss_tips/actions/workflows/build_from_source.yml)
 
 
 ## Prerequisite
@@ -37,7 +41,7 @@ Installing Intel MKL has been extremely hard. Fortunately, for Ubuntu 20.04 or h
 ```bash
 sudo apt install -y intel-mkl
 ```
-The official wiki introduces [the way to use MKL inside the anaconda](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss). I've tried it dozens of times, and it doesn't work. If anyone can make it work, please send me an issue/PR.
+The official wiki introduces [the way to use MKL inside the anaconda](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss). I've tried it dozens of times, and it doesn't work... If anyone can make it work, please send me an issue/PR.
 
 If you cannot install intel-mkl, you can use open-blas by `sudo apt install -y libopenblas-dev`
 
@@ -78,7 +82,7 @@ which python    # /home/ubuntu/miniconda/bin/python
 ```
 
 
-## Build c++
+## Build
 Clone the repo.
 ```bash
 cd $HOME
@@ -93,9 +97,10 @@ cmake -B build \
     -DBUILD_TESTING=ON \
     -DFAISS_OPT_LEVEL=avx2 \
     -DFAISS_ENABLE_GPU=OFF \
-    -DFAISS_ENABLE_PYTHON=OFF \
+    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 ```
+For `-DPython_EXECUTABLE`, write the output of `which python`.
 This `cmake` creates a `build` directory.
 Note that you don't need to specify `-DBLA_VENDOR` and `-DMKL_LIBRARIES`.
 
@@ -106,7 +111,7 @@ Then, run make to build the library.
 ```bash
 make -C build -j faiss faiss_avx2
 ```
-This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I don't really understand the point, but we need to manually specify `faiss_avx2`.
+This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I don't really understand the point, but we need to manually specify `faiss_avx2` as well.
 
 Let's check the link information by:
 ```bash
@@ -130,47 +135,22 @@ This will show something like:
 Here, you can see `/lib/x86_64-linux-gnu/libmkl_intel_lp64.so`, etc. This means that faiss links the system-installed Intel MKL.
 
 
-Then let's test. It seems `make -C build test` doesn't work. So let's try `demo_ivfpq_indexing`
+Then let's test c++. It seems `make -C build test` doesn't work. So let's try `demo_ivfpq_indexing`
 
 ```bash
-make -C build demo_ivfpq_indexing
+make -C build -j demo_ivfpq_indexing
 ./build/demos/demo_ivfpq_indexing
 ```
 It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, then distances):` 
 
 
-
-## Build python
-If you make sure that the c++ faiss works, let's move to python.
-Let us delete the build directory first and cmake again.
-```bash
-cd $HOME/faiss
-rm -rf build
-```
-
-Let's run cmake.
-```
-cmake -B build \
-    -DBUILD_SHARED_LIBS=ON \
-    -DBUILD_TESTING=ON \
-    -DFAISS_OPT_LEVEL=avx2 \
-    -DFAISS_ENABLE_GPU=OFF \
-    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
-    -DCMAKE_BUILD_TYPE=Release .
-```
-For `-DPython_EXECUTABLE`, write the output of `which python`.
-
-Run make 
-```bash
-make -C build -j faiss faiss_avx2
-```
-
 Then let's build the python module. Run the following.
 ```bash
 make -C build -j swigfaiss swigfaiss_avx2
 ```
+This will create files on `build/faiss/python`.
 
-Then let's install it on your python.
+Then let's install the module on your python.
 ```bash
 cd build/faiss/python
 python setup.py install

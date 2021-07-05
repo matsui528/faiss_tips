@@ -63,7 +63,7 @@ jobs:
         ldd build/faiss/libfaiss_avx2.so
 
         echo "##### Run c++ test #####"        
-        make -C build demo_ivfpq_indexing
+        make -C build -j demo_ivfpq_indexing
         ./build/demos/demo_ivfpq_indexing
 
         echo "##### Run python test #####"        
