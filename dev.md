@@ -1,7 +1,7 @@
 # Develop
 - We assume that you've [already installed faiss](build.md)
 
-## How to add your calss
+## How to add your class
 Let's write your own index, build the library with it, and use it in python. Here, we will add `IndexHello` class, which is inherited from `IndexFlatL2` class but with `hello` function.
 
 Add the following file as `IndexHello.h` at `$HOME/faiss/faiss`.
@@ -124,3 +124,60 @@ Run it by `python check.py`, then you'll obtain the result.
  [  2 350 554 788 742]]
 Hello!
 ```
+
+
+## Debug
+
+Here, I will introduce how to debug the c++ files. Especially,
+I focus the files in the `demos` directory.
+It is because they are already under the cmake managament, thus easy to debug.
+
+In summary what we need to do is:
+- Follow the official tutorial of [CMake Tools on Linux for vscode](https://code.visualstudio.com/docs/cpp/cmake-linux)
+- Leverage the official [launch.json](https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#debugging-with-cmake-tools-and-launch-json) of CMake Tools
+
+
+First, install gdb:
+```bash
+sudo apt install gdb
+```
+
+Create launch.json.
+```bash
+cd $HOME/faiss
+mkdir .vscode/
+touch .vscode/launch.json
+```
+Then copy [this](https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#debugging-with-cmake-tools-and-launch-json) to the `launch.json`.
+
+
+Open the faiss directory (`$HOME/faiss`) by vscode. Install [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) and [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools).
+
+You first need to specify your compiler. Open the Command Palette (`Ctrl+Shift+P`), and run the **CMake: Select a Kit**. Select the g++ that you used to build faiss.
+
+You then need to select the variant (Debug or Release). Open the Command Palette again and run the **CMake: Select Variant**. Select **Debug**.
+
+Then, run the cmake again in the terminal of vscode.
+```bash
+cmake -B build \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTING=ON \
+    -DFAISS_OPT_LEVEL=avx2 \
+    -DFAISS_ENABLE_GPU=OFF \
+    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
+    -DCMAKE_BUILD_TYPE=Release .
+```
+(I'm not sure why we need this process, but it seems that we need to manually specify `build/CMakeCache.txt`)
+
+
+Open the Command Palette and run the **CMake: Configure**.
+
+Open the Command Palette and run the **CMake: Build**. 
+
+Now you can select the build target at the bottom of the windows. Then select the file you want to debug. 
+![](img/debug_faiss1.png)
+
+
+Open the Command Palette and run the **CMake: Debug** (or, press `CTRL+F5`, or, click the bug button at the bottom of the window), then you can debug it.
+
+![](img/debug_faiss2.png)
