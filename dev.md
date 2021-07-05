@@ -132,24 +132,13 @@ Here, I will introduce how to debug the c++ files. Especially,
 I focus the files in the `demos` directory.
 It is because they are already under the cmake managament, thus easy to debug.
 
-In summary what we need to do is:
-- Follow the official tutorial of [CMake Tools on Linux for vscode](https://code.visualstudio.com/docs/cpp/cmake-linux)
-- Leverage the official [launch.json](https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#debugging-with-cmake-tools-and-launch-json) of CMake Tools
+In summary, we will follow the official tutorial of [CMake Tools on Linux for vscode](https://code.visualstudio.com/docs/cpp/cmake-linux)
 
 
 First, install gdb:
 ```bash
 sudo apt install gdb
 ```
-
-Create launch.json.
-```bash
-cd $HOME/faiss
-mkdir .vscode/
-touch .vscode/launch.json
-```
-Then copy [this](https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#debugging-with-cmake-tools-and-launch-json) to the `launch.json`.
-
 
 Open the faiss directory (`$HOME/faiss`) by vscode. Install [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) and [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools).
 
@@ -174,10 +163,12 @@ Open the Command Palette and run the **CMake: Configure**.
 
 Open the Command Palette and run the **CMake: Build**. 
 
-Now you can select the build target at the bottom of the windows. Then select the file you want to debug. 
+Now you can select the build target. Click the area of the bottom of the windows. Then select the target you want to debug. 
 ![](img/debug_faiss1.png)
 
-
-Open the Command Palette and run the **CMake: Debug** (or, press `CTRL+F5`, or, click the bug button at the bottom of the window), then you can debug it.
+Now you can run the debugger. There are three ways to debug, so do the one you like.
+- Open the Command Palette and run the **CMake: Debug**.
+- Press `CTRL+F5` (**Not** `F5`)
+- Click the bug button at the bottom of the window 
 
 ![](img/debug_faiss2.png)
