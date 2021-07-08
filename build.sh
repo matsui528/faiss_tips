@@ -5,7 +5,7 @@ sudo snap install cmake --classic
 cd $HOME
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/miniconda.sh
 bash $HOME/miniconda.sh -b -p $HOME/miniconda
-export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
+export PATH="$HOME/miniconda/bin:$PATH"
 echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> $HOME/.bashrc
 conda update conda --yes
 conda update --all --yes
