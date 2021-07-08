@@ -67,8 +67,11 @@ bash $HOME/miniconda.sh -b -p $HOME/miniconda
 ```
 Then activate the miniconda
 ```bash
+export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
+```
+Write the above line at bashrc so we don't have to run it every time.
+```bash
 echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> $HOME/.bashrc
-source $HOME/.bashrc
 ```
 Install required packages
 ```bash
@@ -161,8 +164,8 @@ python setup.py install
 
 Finally, you need to specify the PYTHONPATH. Write it on `~/.bashrc`.
 ```bash
+export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
-source $HOME/.bashrc
 ```
 
 Now you can use faiss from python.

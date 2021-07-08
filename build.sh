@@ -5,8 +5,8 @@ sudo snap install cmake --classic
 cd $HOME
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O $HOME/miniconda.sh
 bash $HOME/miniconda.sh -b -p $HOME/miniconda
+export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 echo 'export PATH="$HOME/miniconda/bin:$PATH"' >> $HOME/.bashrc
-source $HOME/.bashrc
 conda update conda --yes
 conda update --all --yes
 conda install numpy --yes
@@ -31,5 +31,5 @@ make -C build -j swigfaiss swigfaiss_avx2
 cd build/faiss/python
 python setup.py install
 
+export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
-source $HOME/.bashrc
