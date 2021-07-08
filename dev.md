@@ -2,7 +2,7 @@
 - We assume that you've [already installed faiss](build.md)
 
 ## How to add your class
-Let's write your own index, build the library with it, and use it in python. Here, we will add `IndexHello` class, which is inherited from `IndexFlatL2` class but with `hello` function.
+Let's write your index, build the library with it, and use it in python. Here, we will add `IndexHello` class, which is inherited from `IndexFlatL2` class but with `hello` function.
 
 Add the following file as `IndexHello.h` at `$HOME/faiss/faiss`.
 ```c++
@@ -51,7 +51,7 @@ make -C build -j faiss_avx2
 Note that we build `faiss_avx2` only since that's all we use.
 
 ## Run your class in c++
-The easiest way to make sure `IndexHello` works is to add a script in the demos directory.
+The easiest way to make sure `IndexHello` works is to add a script in the `demos` directory.
 
 Save the following file as `demo_hello.cpp` at `$HOME/demos`.
 ```c++
@@ -80,7 +80,7 @@ Hello!
 ```
 
 ## Run your class in python
-To use your class inside python, you need to update the following lines on `$HOME/faiss/python/swigfaiss.swig`. Because we inherit `IndexPQ` this time, it would be clear to write the line after the counterpart of `IndexPQ`.
+To use your class inside python, you need to update the following lines on `$HOME/faiss/python/swigfaiss.swig`. Because we inherit `IndexPQ` this time, it would be good to write the line after the counterpart of `IndexPQ`.
 - Add `#include <faiss/IndexHello.h>` after `#include <faiss/IndexPQ.h>`
 - Add `%include  <faiss/IndexHello.h>` after `%include  <faiss/IndexPQ.h>`
 - Add `DOWNCAST ( IndexHello )` after `DOWNCAST ( IndexPQ )`. Note that this addition depends on the inheritance of your class.
@@ -128,7 +128,7 @@ Hello!
 
 ## Debug
 
-Here, I will introduce how to debug the c++ files. Especially,
+Here, I will introduce how to debug the c++ files. Mainly,
 I focus the files in the `demos` directory.
 It is because they are already under the cmake managament, thus easy to debug.
 
@@ -163,12 +163,12 @@ Open the Command Palette and run the **CMake: Configure**.
 
 Open the Command Palette and run the **CMake: Build**. 
 
-Now you can select the build target. Click the area of the bottom of the windows. Then select the target you want to debug. 
+Now you can select the build target. Click the area at the bottom of the window. Then select the target you want to debug. 
 ![](img/debug_faiss1.png)
 
 Now you can run the debugger. There are three ways to debug, so do the one you like.
 - Open the Command Palette and run the **CMake: Debug**.
-- Press `CTRL+F5` (**Not** `F5`)
+- Press `CTRL+F5` (**Not** `F5`. See [this](https://vector-of-bool.github.io/docs/vscode-cmake-tools/debugging.html#quick-debugging). What we do here is so-called `Quick Debugging`)
 - Click the bug button at the bottom of the window 
 
 ![](img/debug_faiss2.png)

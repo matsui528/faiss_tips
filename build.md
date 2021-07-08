@@ -144,7 +144,7 @@ make -C build -j demo_ivfpq_indexing
 ```
 It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, then distances):`.
 
-Note that this script uses `libfaiss.so`. If you want to use `libfaiss_avx2.so`, please rewrite `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss)` to `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss_avx2)` in `$HOME/faiss/demos/CMakeLists.txt`.
+Note that `demo_ivfpq_indexing` uses `libfaiss.so`. If you want to use `libfaiss_avx2.so`, please rewrite `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss)` to `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss_avx2)` in `$HOME/faiss/demos/CMakeLists.txt`.
 
 
 Then let's build the python module. Run the following.
@@ -168,7 +168,7 @@ source $HOME/.bashrc
 Now you can use faiss from python.
 Let's check it.
 ```bash
-cd    # Do this. We need to verify that we can use python-faiss from any place
+cd    # Recommend changing the directory. We need to make sure that we can use python-faiss from any place
 python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
 ```
 You will see something like `483.5049743652344`.
@@ -190,7 +190,8 @@ LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so
 ```
 If you see something, then your AVX2 **is** activated.
 
-To actually evaluate the runtime, please save the following as `check.py`
+To actually evaluate the runtime, please save the following as `check.py`.
+This code compares `IndexPQ` and `IndexPQFastScan`. Here, `IndexPQFastScan` is a faster (approximated) version of `IndexPQ` with SIMD instructions (AVX2 for usual x86 computers).
 ```python
 import faiss
 import numpy as np
@@ -225,7 +226,7 @@ assert np.allclose(ids1, ids2)
 ```
 
 Then run `python check.py`.
-If AVX2 is properly activated, pq_fast should be more roughly 10x faster:
+If AVX2 is properly activated, pq_fast should be roughly 10x faster:
 ```bash
 pq: 0.5166530609130859 msec
 pq_fast: 0.06580352783203125 msec
