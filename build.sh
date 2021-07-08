@@ -20,7 +20,8 @@ cmake -B build \
     -DBUILD_TESTING=ON \
     -DFAISS_OPT_LEVEL=avx2 \
     -DFAISS_ENABLE_GPU=OFF \
-    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
+    -DFAISS_ENABLE_PYTHON=ON \
+    -DPython_EXECUTABLE=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 
 make -C build -j faiss faiss_avx2

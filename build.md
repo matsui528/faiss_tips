@@ -1,10 +1,10 @@
 # Build
-This is a step-by-step instruction for building faiss from source. We assume:
+This document is a step-by-step instruction for building faiss from the source. We assume:
 - x86 architecture
 - CPU
 - Ubuntu 20.04 
 - miniconda for python environment
-- Intel MKL (we can install it simply by `apt` for Ubuntu 20.04+)
+- Intel MKL (we can install it simply by `apt` for Ubuntu 20.04 or higher)
 - AVX2
 
 We will install faiss and conda on `$HOME`, i.e., 
@@ -76,9 +76,9 @@ conda update conda --yes
 conda update --all --yes
 conda install numpy --yes
 ```
-Make sure your python path works
+Make sure your python path works.
 ```bash
-which python    # /home/ubuntu/miniconda/bin/python
+which python    # e.g., /home/ubuntu/miniconda/bin/python
 ```
 
 
@@ -97,21 +97,22 @@ cmake -B build \
     -DBUILD_TESTING=ON \
     -DFAISS_OPT_LEVEL=avx2 \
     -DFAISS_ENABLE_GPU=OFF \
-    -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
+    -DFAISS_ENABLE_PYTHON=ON \
+    -DPython_EXECUTABLE=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 ```
 For `-DPython_EXECUTABLE`, write the output of `which python`.
 This `cmake` creates a `build` directory.
 Note that you don't need to specify `-DBLA_VENDOR` and `-DMKL_LIBRARIES`.
 
-In the log message, you will find that MKL is correctly found: `-- Found MKL: /usr/lib/x86_64-linux-gnu/libmkl_intel_lp64.so;/usr/lib/x86_64-linux-gnu/libmkl_sequential.so;/usr/lib/x86_64-linux-gnu/libmkl_core.so;-lpthread;-lm;-ldl`
+In the log message, you will find that the cmake correctly located the MKL: `-- Found MKL: /usr/lib/x86_64-linux-gnu/libmkl_intel_lp64.so;/usr/lib/x86_64-linux-gnu/libmkl_sequential.so;/usr/lib/x86_64-linux-gnu/libmkl_core.so;-lpthread;-lm;-ldl`
 
 
 Then, run make to build the library.
 ```bash
 make -C build -j faiss faiss_avx2
 ```
-This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I don't really understand the point, but we need to manually specify `faiss_avx2` as well.
+This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I'm not sure about this part, but we need to specify `faiss_avx2` as well manually.
 
 Let's check the link information by:
 ```bash
@@ -132,7 +133,7 @@ This will show something like:
         /lib64/ld-linux-x86-64.so.2 (0x00007f4e3de2a000)
         libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007f4e370ee000)
 ```
-Here, you can see `/lib/x86_64-linux-gnu/libmkl_intel_lp64.so`, etc. This means that faiss links the system-installed Intel MKL.
+Here, you can see `/lib/x86_64-linux-gnu/libmkl_intel_lp64.so`, etc. This message means that faiss links the system-installed Intel MKL correctly.
 
 
 Then let's test c++. It seems `make -C build test` doesn't work. So let's try `demo_ivfpq_indexing`
