@@ -132,21 +132,21 @@ Here, I will introduce how to debug the c++ files. Mainly,
 I focus the files in the `demos` directory.
 It is because they are already under the cmake managament, thus easy to debug.
 
-In summary, we will follow the official tutorial of [CMake Tools on Linux for vscode](https://code.visualstudio.com/docs/cpp/cmake-linux)
+In summary, we will follow the official tutorial of [CMake Tools on Linux for vscode](https://code.visualstudio.com/docs/cpp/cmake-linux). Note that we've already finished configuration, we can skip some processes.
 
 
 First, install gdb:
 ```bash
-sudo apt install gdb
+sudo apt install -y gdb
 ```
 
 Open the faiss directory (`$HOME/faiss`) by vscode. Install [C/C++ extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools) and [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools).
 
 You first need to specify your compiler. Open the Command Palette (`Ctrl+Shift+P`), and run the **CMake: Select a Kit**. Select the g++ that you used to build faiss.
 
-You then need to select the variant (Debug or Release). Open the Command Palette again and run the **CMake: Select Variant**. Select **Debug**.
 
 Then, run the cmake again in the terminal of vscode.
+Please change`-DCMAKE_BUILD_TYPE` from `Release` to `Debug`.
 ```bash
 cmake -B build \
     -DBUILD_SHARED_LIBS=ON \
@@ -154,14 +154,12 @@ cmake -B build \
     -DFAISS_OPT_LEVEL=avx2 \
     -DFAISS_ENABLE_GPU=OFF \
     -DFAISS_ENABLE_PYTHON=$HOME/miniconda/bin/python \
-    -DCMAKE_BUILD_TYPE=Release .
+    -DCMAKE_BUILD_TYPE=Debug .
 ```
-(I'm not sure why we need this process, but it seems that we need to manually specify `build/CMakeCache.txt`)
+This will create a new cmake configuration for debugging. You can see the config in `build/CMakeCache.txt`.
 
 
-Open the Command Palette and run the **CMake: Configure**.
-
-Open the Command Palette and run the **CMake: Build**. 
+Open the Command Palette and run the **CMake: Build**. This will build the faiss with the `Debug` mode.
 
 Now you can select the build target. Click the area at the bottom of the window. Then select the target you want to debug. 
 ![](img/debug_faiss1.png)

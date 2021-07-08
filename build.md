@@ -67,7 +67,7 @@ bash $HOME/miniconda.sh -b -p $HOME/miniconda
 ```
 Then activate the miniconda
 ```bash
-export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
+export PATH="$HOME/miniconda/bin:$PATH"
 ```
 Write the above line at bashrc so we don't have to run it every time.
 ```bash
@@ -162,7 +162,7 @@ cd build/faiss/python
 python setup.py install
 ```
 
-Finally, you need to specify the PYTHONPATH. Write it on `~/.bashrc`.
+Finally, you need to specify the PYTHONPATH. Activate it, and write it on `~/.bashrc`.
 ```bash
 export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH
 echo 'export PYTHONPATH=$HOME/faiss/build/faiss/python/build/lib:$PYTHONPATH' >> $HOME/.bashrc
