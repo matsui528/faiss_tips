@@ -36,7 +36,7 @@ Official documents:
 sudo apt install -y build-essential swig
 ```
 
-### Intel MKL
+### BLAS: Intel MKL
 Installing Intel MKL has been extremely hard. Fortunately, for Ubuntu 20.04 or higher, we can install it simply by `apt install`.
 ```bash
 sudo apt install -y intel-mkl
@@ -236,3 +236,37 @@ pq_fast: 0.06580352783203125 msec
 ```
 
 
+## (Advanced) ARM
+- For ARM architecture such as AWS Graviton2, you can build faiss by rewriting some of the above instructions as follows.
+- For SIMD, we'll use NEON instead of AVX2.
+
+### BLAS: BLAS-openmp
+We cannot install Intel MKL for ARM by pip. So an easy way is to use openblas-openmp.
+```bash
+sudo apt install -y libopenblas-openmp-dev
+```
+
+### miniconda
+Replace the path to the bash file with the one for arm:
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-aarch64.sh -O $HOME/miniconda.sh
+bash $HOME/miniconda.sh -b -p $HOME/miniconda
+```
+
+### Build 
+To make the library, you don't need to specify avx2.
+```bash
+cmake -B build \
+    -DBUILD_SHARED_LIBS=ON \
+    -DBUILD_TESTING=ON \
+    -DFAISS_ENABLE_GPU=OFF \
+    -DFAISS_ENABLE_PYTHON=ON \
+    -DPython_EXECUTABLE=$HOME/miniconda/bin/python \
+    -DCMAKE_BUILD_TYPE=Release .
+```
+
+You don't need {faiss, swigfaiss}_avx2
+```bash
+make -C build -j faiss
+make -C build -j swigfaiss
+```
