@@ -41,7 +41,9 @@ Installing Intel MKL has been extremely hard. Fortunately, for Ubuntu 20.04 or h
 ```bash
 sudo apt install -y intel-mkl
 ```
-The official wiki introduces [the way to use MKL inside the anaconda](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss). I've tried it dozens of times, and it doesn't work... If anyone can make it work, please send me an issue/PR.
+You may be asked about the license. Please carefully understand the terms of the license and choose yes to the question of "Use libmkl_rt.so as the default alternative to BLAS/LAPACK? ".
+
+Note that the official wiki introduces [the way to use MKL inside the anaconda](https://github.com/facebookresearch/faiss/wiki/Installing-Faiss). I've tried it dozens of times, and it doesn't work... If anyone can make it work, please send me an issue/PR.
 
 If you cannot install intel-mkl, you can use open-blas by `sudo apt install -y libopenblas-dev`
 
