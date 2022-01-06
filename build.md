@@ -243,7 +243,7 @@ pq_fast: 0.06580352783203125 msec
 - For SIMD, we'll use NEON instead of AVX2.
 
 ### BLAS: BLAS-openmp
-We cannot install Intel MKL for ARM by pip. So an easy way is to use openblas-openmp.
+We cannot install Intel MKL for ARM by apt. So an easy way is to use openblas-openmp.
 ```bash
 sudo apt install -y libopenblas-openmp-dev
 ```
