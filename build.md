@@ -2,7 +2,7 @@
 This document is a step-by-step instruction for building faiss from the source. We assume:
 - x86 architecture
 - CPU
-- Ubuntu 20.04 
+- Ubuntu 22.04 
 - miniconda for python environment
 - Intel MKL (we can install it simply by `apt` for Ubuntu 20.04 or higher)
 - AVX2
@@ -49,19 +49,16 @@ If you cannot install intel-mkl, you can use open-blas by `sudo apt install -y l
 
 
 ### cmake
- 
 Currently, cmake from apt is old (3.16 for Ubuntu 20.04, and 3.22 for Ubuntu 22.04). For faiss 1.7+, we need cmake 3.23+. There are three options to install new cmake.
 - Build from source
 - Install by snap. This is the easiest.
     ```bash
     sudo snap install cmake --classic
     ```
-    Note that WSL recently supported snap. See [this](https://devblogs.microsoft.com/commandline/systemd-support-is-now-available-in-wsl/#set-the-systemd-flag-set-in-your-wsl-distro-settings).
 - If you've installed conda, you can install cmake by conda.
     ```bash
     conda install -c anaconda cmake 
     ```
-- [Use APT repository](https://askubuntu.com/a/1157132). Seems easy. Not tested by myself though.
 
 ### miniconda
 We will use miniconda for python. See [this](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html#install-macos-silent) for the instruction of the silent installation.
@@ -118,13 +115,13 @@ In the log message, you will find that the cmake correctly located the MKL: `-- 
 
 Then, run make to build the library.
 ```bash
-make -C build -j faiss
+make -C build -j faiss faiss_avx2
 ```
-This will create `build/faiss/libfaiss.so`.
+This will create `build/faiss/libfaiss.so` and `build/faiss/libfaiss_avx2.so`. I'm not sure about this part, but we need to specify `faiss_avx2` as well manually.
 
 Let's check the link information by:
 ```bash
-ldd build/faiss/libfaiss.so
+ldd build/faiss/libfaiss_avx2.so
 ```
 This will show something like:
 ```bash
@@ -152,11 +149,12 @@ make -C build -j demo_ivfpq_indexing
 ```
 It takes 7 sec for AWS EC2 c5.12xlarge: `[7.298 s] Query results (vector ids, then distances):`.
 
+Note that `demo_ivfpq_indexing` uses `libfaiss.so`. If you want to use `libfaiss_avx2.so`, please rewrite `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss)` to `target_link_libraries(demo_ivfpq_indexing PRIVATE faiss_avx2)` in `$HOME/faiss/demos/CMakeLists.txt`.
 
 
 Then let's build the python module. Run the following.
 ```bash
-make -C build -j swigfaiss
+make -C build -j swigfaiss swigfaiss_avx2
 ```
 This will create files on `build/faiss/python`.
 
@@ -165,7 +163,6 @@ Then let's install the module on your python.
 cd build/faiss/python
 python setup.py install
 ```
-This will update your python environment (You can uninstall it by `pip uninstall faiss`).
 
 Finally, you need to specify the PYTHONPATH. Activate it, and write it on `~/.bashrc`.
 ```bash
@@ -183,21 +180,20 @@ You will see something like `483.5049743652344`.
 
 
 ## Check AVX2 is working or not
-Let's check AVX2 is activated or not. First, you can see the path information of `libfaiss.so` from python by
+Let's check AVX2 is activated or not.
 
 ```bash
 cd
 LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss.so
 ```
-You will see something like
-```console
-      ...
-      4886:       trying file=haswell/libfaiss.so
-      4886:       trying file=avx512_1/x86_64/libfaiss.so
-      4886:       trying file=avx512_1/libfaiss.so
-      4886:       trying file=x86_64/libfaiss.so
-      ...
+If you see something, then your AVX2 **is not** activated.
+
+Run the following as well
+```bash
+cd
+LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so
 ```
+If you see something, then your AVX2 **is** activated.
 
 To actually evaluate the runtime, please save the following as `check.py`.
 This code compares `IndexPQ` and `IndexPQFastScan`. Here, `IndexPQFastScan` is a faster (approximated) version of `IndexPQ` with SIMD instructions (AVX2 for usual x86 computers).
@@ -206,9 +202,9 @@ import faiss
 import numpy as np
 import time
 
-np.random.seed(123)
+np.random.seed(234)
 D = 128
-N = 1000
+N = 10000
 X = np.random.random((N, D)).astype(np.float32)
 M = 64
 nbits = 4

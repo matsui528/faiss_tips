@@ -30,14 +30,16 @@ jobs:
         cd
         python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
 
-        echo "##### Check AVX2 is working or not #####"        
+        echo "##### Check AVX2 is working or not #####"      
+        LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so  
+
         echo "import faiss
         import numpy as np
         import time
 
-        np.random.seed(123)
+        np.random.seed(234)
         D = 128
-        N = 1000
+        N = 10000
         X = np.random.random((N, D)).astype(np.float32)
         M = 64
         nbits = 4

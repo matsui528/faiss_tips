@@ -24,9 +24,9 @@ cmake -B build \
     -DPython_EXECUTABLE=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 
-make -C build -j faiss
+make -C build -j faiss faiss_avx2
 
-make -C build -j swigfaiss
+make -C build -j swigfaiss swigfaiss_avx2
 
 cd build/faiss/python
 python setup.py install
