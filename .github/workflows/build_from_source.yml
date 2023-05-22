@@ -20,7 +20,7 @@ jobs:
         cd $HOME/faiss
 
         echo "##### Check ldd of .so #####"
-        ldd build/faiss/libfaiss.so
+        ldd build/faiss/libfaiss_avx2.so
 
         echo "##### Run c++ test #####"        
         make -C build -j demo_ivfpq_indexing

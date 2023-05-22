@@ -59,6 +59,8 @@ Currently, cmake from apt is old (3.16 for Ubuntu 20.04, and 3.22 for Ubuntu 22.
     ```bash
     conda install -c anaconda cmake 
     ```
+- [Use APT repository](https://askubuntu.com/a/1157132). Seems easy. Not tested by myself though.
+
 
 ### miniconda
 We will use miniconda for python. See [this](https://conda.io/projects/conda/en/latest/user-guide/install/macos.html#install-macos-silent) for the instruction of the silent installation.
