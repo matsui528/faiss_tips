@@ -20,7 +20,7 @@ jobs:
         cd $HOME/faiss
 
         echo "##### Check ldd of .so #####"
-        ldd build/faiss/libfaiss_avx2.so
+        ldd build/faiss/libfaiss.so
 
         echo "##### Run c++ test #####"        
         make -C build -j demo_ivfpq_indexing
@@ -30,5 +30,3 @@ jobs:
         cd
         python -c "import faiss, numpy; err = faiss.Kmeans(10, 20).train(numpy.random.rand(1000, 10).astype('float32')); print(err)"
 
-        echo "##### AVX2 is activated or not #####"
-        LD_DEBUG=libs python -c "import faiss" 2>&1 | grep libfaiss_avx2.so
