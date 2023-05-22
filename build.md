@@ -55,6 +55,7 @@ Currently, cmake from apt is old (3.16 for Ubuntu 20.04, and 3.22 for Ubuntu 22.
     ```bash
     sudo snap install cmake --classic
     ```
+    Note that WSL recently supported snap. See [this](https://devblogs.microsoft.com/commandline/systemd-support-is-now-available-in-wsl/#set-the-systemd-flag-set-in-your-wsl-distro-settings).
 - If you've installed conda, you can install cmake by conda.
     ```bash
     conda install -c anaconda cmake 
@@ -165,6 +166,7 @@ Then let's install the module on your python.
 cd build/faiss/python
 python setup.py install
 ```
+This will update your python environment (You can uninstall it by `pip uninstall faiss`).
 
 Finally, you need to specify the PYTHONPATH. Activate it, and write it on `~/.bashrc`.
 ```bash
