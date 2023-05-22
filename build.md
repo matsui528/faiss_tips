@@ -237,8 +237,8 @@ assert np.allclose(ids1, ids2)
 Then run `python check.py`.
 If AVX2 is properly activated, pq_fast should be roughly 10x faster:
 ```bash
-pq: 0.5166530609130859 msec
-pq_fast: 0.06580352783203125 msec
+pq: 1.8916130065917969 msec
+pq_fast: 0.1723766326904297 msec
 ```
 
 
