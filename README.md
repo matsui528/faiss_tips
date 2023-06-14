@@ -373,3 +373,8 @@ Out[2]:
  'SSE42',
  'SSSE3'}
 ```
+
+
+## Check memory usage
+When you would like to check memory usage of faiss, you should call `faiss.get_mem_usage_kb()`.  
+See [the example usage](https://github.com/facebookresearch/faiss/blob/d8a63506075456dc8016fd33ddf0f34d47c3a1b6/benchs/bench_all_ivf/bench_all_ivf.py#L301) and [the implementation](https://github.com/facebookresearch/faiss/blob/d8a63506075456dc8016fd33ddf0f34d47c3a1b6/faiss/utils/utils.cpp#L158) for more detail.
