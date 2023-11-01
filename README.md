@@ -378,3 +378,47 @@ Out[2]:
 ## Check memory usage
 When you would like to check memory usage of faiss, you should call `faiss.get_mem_usage_kb()`.  
 See [the example usage](https://github.com/facebookresearch/faiss/blob/d8a63506075456dc8016fd33ddf0f34d47c3a1b6/benchs/bench_all_ivf/bench_all_ivf.py#L301) and [the implementation](https://github.com/facebookresearch/faiss/blob/d8a63506075456dc8016fd33ddf0f34d47c3a1b6/faiss/utils/utils.cpp#L158) for more detail.
+
+
+## Environment variables for multi-threading
+Faiss recommends using Intel-MKL as the implementation for BLAS. At the same time, Faiss internally parallelizes using OpenMP. Both MKL and OpenMP have their respective environment variables that dictate the number of threads.
+
+- `OMP_NUM_THREADS`: Number of threads for OpenMP
+- `MKL_NUM_THREADS`: Number of threads for MKL
+- `OMP_DYNAMIC`: Whether to dynamically change the number of threads for OpenMP
+- `MKL_DYNAMIC`: Whether to dynamically change the number of threads for MKL
+- `OMP_MAX_ACTIVE_LEVEL`: Maximum level of nested parallelism in OpenMP
+
+To always use the maximum number of threads, set them as follows. This is useful when measuring performance.
+
+```bash
+// set number of threads (depends on your CPU environment)
+export MKL_NUM_THREADS=8
+// disable dynamic thread adjustment for openmp
+export OMP_DYNAMIC=FALSE
+// disable dynamic thread adjustment for mkl
+export MKL_DYNAMIC=FALSE
+// set max level of nested parallelism
+// `export OMP_NESTED=TRUE` is deprecated, so we use:
+export OMP_MAX_ACTIVE_LEVEL=32 (large enough)
+```
+
+You can also specify the number of threads from within the program as follows:
+
+```python
+import faiss
+import mkl
+
+# set number of threads for openmp
+faiss.omp_set_num_threads(8)
+# set number of threads for mkl
+mkl.set_num_threads(8)
+```
+
+Moreover, in general:
+
+- Thread control by MKL has a higher priority than thread control by OpenMP.
+- Thread control by function calls takes precedence over thread control by environment variables.
+
+Reference:
+- [Techniques to Set the Number of Threads](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2023-0/techniques-to-set-the-number-of-threads.html)
