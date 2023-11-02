@@ -219,6 +219,7 @@ Or, you can explicitly set an environment variable in your terminal.
 ```
 export OMP_NUM_THREADS=1
 ```
+See [this section](#environment-variables-for-multi-threading) as well.
 
 ## Hamming distance table
 Given two sets of binary vectors, pairwise hamming distances can be computed as follows.
