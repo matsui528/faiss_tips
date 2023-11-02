@@ -395,13 +395,15 @@ To always use the maximum number of threads, set them as follows. This is useful
 ```bash
 // set number of threads (depends on your CPU environment)
 export MKL_NUM_THREADS=8
+export OMP_NUM_THREADS=8
 // disable dynamic thread adjustment for openmp
 export OMP_DYNAMIC=FALSE
 // disable dynamic thread adjustment for mkl
 export MKL_DYNAMIC=FALSE
 // set max level of nested parallelism
-// `export OMP_NESTED=TRUE` is deprecated, so we use:
-export OMP_MAX_ACTIVE_LEVEL=32 (large enough)
+// `export OMP_NESTED=TRUE` is deprecated, so we use `OMP_MAX_ACTIVE_LEVEL` instead
+// set it to large enough value
+export OMP_MAX_ACTIVE_LEVEL=32
 ```
 
 You can also specify the number of threads from within the program as follows:
