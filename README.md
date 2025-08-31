@@ -260,7 +260,7 @@ print(dis)
 
 
 ## Merge results
-You can merge search results from several indices by [ResultHeap](https://github.com/facebookresearch/faiss/blob/master/faiss/python/__init__.py#L966)
+You can merge search results from several indices by [ResultHeap](https://github.com/facebookresearch/faiss/blob/2135e5a28d0f2a932dd02b64b566ac1a52266540/faiss/python/extra_wrappers.py#L219)
 
 ```python
 import faiss
