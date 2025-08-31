@@ -2,8 +2,8 @@
 - Some useful tips for [faiss](https://github.com/facebookresearch/faiss)
 - We suppose faiss is installed via conda:
     ```
-    conda install faiss-cpu -c pytorch
-    conda install faiss-gpu -c pytorch
+    conda install -c pytorch faiss-cpu
+    conda install -c pytorch -c nvidia faiss-gpu
     ```
 - If you want to build faiss from source, see:
     - [instruction](build.md)
