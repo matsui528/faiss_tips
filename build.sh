@@ -24,9 +24,24 @@ cmake -B build \
     -DPython_EXECUTABLE=$HOME/miniconda/bin/python \
     -DCMAKE_BUILD_TYPE=Release .
 
+if [ $? -ne 0 ]; then
+    echo "Error: CMake build failed"
+    exit 1
+fi
+
 make -C build -j faiss faiss_avx2
 
+if [ $? -ne 0 ]; then
+    echo "Error: Building C++ library failed"
+    exit 1
+fi
+
 make -C build -j swigfaiss swigfaiss_avx2
+
+if [ $? -ne 0 ]; then
+    echo "Error: Building Python bindings failed"
+    exit 1
+fi
 
 cd build/faiss/python
 python setup.py install
